@@ -1,0 +1,12 @@
+services:
+  kata-db:
+    container_name: kata-db
+    image: postgres:16.3
+    command: ["postgres", "-c", "log_statement=all"]
+    env_file:
+      - .env.local
+    volumes:
+      - ./src/persistence/init:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    restart: no
