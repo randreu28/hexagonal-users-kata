@@ -2,6 +2,17 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "@/lib/db";
 import bcrypt from "bcrypt";
 
+function isValidPassword(password: string): boolean {
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*_)[a-zA-Z\d_]{6,}$/;
+  return passwordRegex.test(password);
+}
+
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 export default async function registerHandler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -14,6 +25,19 @@ export default async function registerHandler(
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({
+      message: "Please provide a valid email address",
+    });
+  }
+
+  if (!isValidPassword(password)) {
+    return res.status(400).json({
+      message:
+        "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one underscore",
+    });
   }
 
   try {
