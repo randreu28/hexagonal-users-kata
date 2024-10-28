@@ -6,17 +6,16 @@ export default async function profileHandler(
   res: NextApiResponse
 ) {
   try {
-    // Get user ID from query or session
-    const userId = req.query.userId as string;
+    const id = parseInt(req.query.id as string, 10);
 
-    if (!userId) {
+    if (!id) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
     const user = await db
       .selectFrom("users")
-      .where("id", "=", userId as any) // Type assertion to bypass type checking
-      .select(["id", "email"]) // Only select necessary fields
+      .where("id", "=", id)
+      .select(["id", "email"])
       .executeTakeFirst();
 
     if (!user) {
