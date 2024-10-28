@@ -60,7 +60,8 @@ export default async function registerHandler(
         password: hashedPassword,
       })
       .execute();
-    res.status(201).json({ message: "User created successfully" });
+    res.status(200).json({ message: "User created successfully" });
+    redirect: "/profile";
   } catch (error) {
     res.status(500).json({ message: String(error) });
   }
