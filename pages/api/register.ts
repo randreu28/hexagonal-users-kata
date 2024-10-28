@@ -53,14 +53,20 @@ export default async function registerHandler(
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db
+    const newUser = await db
       .insertInto("users")
       .values({
         email,
         password: hashedPassword,
       })
-      .execute();
-    res.status(201).json({ message: "User created successfully" });
+      .returning(["id", "email"]) // Return user data after insert
+      .executeTakeFirst();
+
+    res.status(201).json({
+      message: "User created successfully",
+      user: newUser,
+      redirect: "/profile", // Add redirect path
+    });
   } catch (error) {
     res.status(500).json({ message: String(error) });
   }
