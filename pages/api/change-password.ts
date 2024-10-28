@@ -27,36 +27,45 @@ export default async function changePasswordHandler(
     return res.status(400).json({ message: "Email and password are required" });
   }
 
+  if (!password || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "Password and new password are required" });
+  }
+
   if (!isValidEmail(email)) {
     return res.status(400).json({
       message: "Please provide a valid email address",
     });
   }
 
-  if (!isValidPassword(password)) {
+  if (!isValidPassword(password) || !isValidPassword(newPassword)) {
     return res.status(400).json({
       message:
         "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one underscore",
     });
   }
 
-  if (!isValidPassword(newPassword)) {
-    return res.status(400).json({
-      message:
-        "New password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one underscore",
-    });
+  if (password === newPassword) {
+    return res
+      .status(400)
+      .json({ message: "New password cannot be the same as the old password" });
   }
 
   try {
-    const userExists = await db
+    const user = await db
       .selectFrom("users")
       .where("email", "=", email)
-      .where("password", "=", password)
       .selectAll()
       .executeTakeFirst();
 
-    if (!userExists) {
+    if (!user) {
       return res.status(400).json({ message: "User not found" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(400).json({ message: "Invalid password" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
