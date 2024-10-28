@@ -68,7 +68,12 @@ export default async function changePasswordHandler(
       })
       .where("email", "=", email)
       .execute();
-    res.status(201).json({ message: "Password changed successfully" });
+
+    // Return success with redirect flag
+    res.status(200).json({
+      message: "Password changed successfully",
+      redirect: "/login",
+    });
   } catch (error) {
     res.status(500).json({ message: String(error) });
   }
